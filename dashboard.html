@@ -1,0 +1,261 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - YouTube Data Analysis{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="display-5 fw-bold">
+                <i class="fas fa-chart-bar text-primary"></i> Analytics Dashboard
+            </h1>
+            <p class="lead text-muted">
+                Explore YouTube video data trends and insights
+            </p>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2">Total Videos</h6>
+                            <h2 class="card-title mb-0">{{ stats.total_videos }}</h2>
+                        </div>
+                        <i class="fas fa-video fa-2x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2">Total Views</h6>
+                            <h2 class="card-title mb-0">{{ "{:,.0f}".format(stats.total_views) }}</h2>
+                        </div>
+                        <i class="fas fa-eye fa-2x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2">Avg Views</h6>
+                            <h2 class="card-title mb-0">{{ "{:,.0f}".format(stats.avg_views) }}</h2>
+                        </div>
+                        <i class="fas fa-chart-line fa-2x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card bg-warning text-dark">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2">Categories</h6>
+                            <h2 class="card-title mb-0">{{ stats.unique_categories }}</h2>
+                        </div>
+                        <i class="fas fa-tags fa-2x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row 1 -->
+    <div class="row mb-4">
+        <div class="col-lg-8 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-chart-bar"></i> Category Distribution</h5>
+                </div>
+                <div class="card-body">
+                    <iframe src="{{ url_for('static', filename='plots/category_distribution.html') }}" 
+                            width="100%" height="400" frameborder="0"></iframe>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-chart-pie"></i> View Distribution</h5>
+                </div>
+                <div class="card-body">
+                    <iframe src="{{ url_for('static', filename='plots/view_distribution.html') }}" 
+                            width="100%" height="400" frameborder="0"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row 2 -->
+    <div class="row mb-4">
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-clock"></i> Upload Patterns</h5>
+                </div>
+                <div class="card-body">
+                    <iframe src="{{ url_for('static', filename='plots/upload_patterns.html') }}" 
+                            width="100%" height="350" frameborder="0"></iframe>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-heart"></i> Engagement Analysis</h5>
+                </div>
+                <div class="card-body">
+                    <iframe src="{{ url_for('static', filename='plots/engagement_analysis.html') }}" 
+                            width="100%" height="350" frameborder="0"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row 3 -->
+    <div class="row mb-4">
+        <div class="col-lg-12 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-fire"></i> Top Videos by Views</h5>
+                </div>
+                <div class="card-body">
+                    <iframe src="{{ url_for('static', filename='plots/top_videos.html') }}" 
+                            width="100%" height="500" frameborder="0"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Correlation Heatmap -->
+    <div class="row mb-4">
+        <div class="col-lg-12 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-th"></i> Feature Correlation</h5>
+                </div>
+                <div class="card-body">
+                    <iframe src="{{ url_for('static', filename='plots/correlation_heatmap.html') }}" 
+                            width="100%" height="500" frameborder="0"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Time Series -->
+    <div class="row mb-4">
+        <div class="col-lg-12 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-calendar-alt"></i> Views Over Time</h5>
+                </div>
+                <div class="card-body">
+                    <iframe src="{{ url_for('static', filename='plots/views_over_time.html') }}" 
+                            width="100%" height="500" frameborder="0"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-table"></i> Summary Statistics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Metric</th>
+                                    <th>Value</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Total Videos Analyzed</td>
+                                    <td>{{ stats.total_videos }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Total Views</td>
+                                    <td>{{ "{:,.0f}".format(stats.total_views) }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Average Views</td>
+                                    <td>{{ "{:,.0f}".format(stats.avg_views) }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Median Views</td>
+                                    <td>{{ "{:,.0f}".format(stats.median_views) }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Maximum Views</td>
+                                    <td>{{ "{:,.0f}".format(stats.max_views) }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Minimum Views</td>
+                                    <td>{{ "{:,.0f}".format(stats.min_views) }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Average Likes</td>
+                                    <td>{{ "{:,.0f}".format(stats.avg_likes) }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Average Comments</td>
+                                    <td>{{ "{:,.0f}".format(stats.avg_comments) }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Unique Categories</td>
+                                    <td>{{ stats.unique_categories }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Unique Channels</td>
+                                    <td>{{ stats.unique_channels }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stat-card {
+        border: none;
+        border-radius: 15px;
+        transition: transform 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .card {
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .card-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+        border-radius: 15px 15px 0 0 !important;
+    }
+</style>
+{% endblock %}

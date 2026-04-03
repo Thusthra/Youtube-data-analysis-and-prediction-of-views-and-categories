@@ -1,0 +1,434 @@
+{% extends "base.html" %}
+
+{% block title %}Compare Videos - YouTube Data Analysis{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-5">
+        <div class="col-12 text-center">
+            <h1 class="display-5 fw-bold">
+                <i class="fas fa-balance-scale text-primary"></i> Compare Videos
+            </h1>
+            <p class="lead text-muted">
+                Compare predictions for multiple videos side by side
+            </p>
+        </div>
+    </div>
+
+    <!-- Video Input Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0"><i class="fas fa-video"></i> Video Details</h4>
+                    <button type="button" class="btn btn-light btn-sm" id="addVideoBtn">
+                        <i class="fas fa-plus"></i> Add Video
+                    </button>
+                </div>
+                <div class="card-body">
+                    <form id="compareForm">
+                        <div id="videoInputs">
+                            <!-- Video 1 -->
+                            <div class="video-input-group mb-4 p-3 border rounded" data-video="1">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="mb-0"><i class="fas fa-video"></i> Video 1</h5>
+                                    <button type="button" class="btn btn-outline-danger btn-sm remove-video" style="display: none;">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Title *</label>
+                                        <input type="text" class="form-control video-title" 
+                                               placeholder="Enter video title" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Tags</label>
+                                        <input type="text" class="form-control video-tags"
+                                               placeholder="Enter tags separated by commas">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <label class="form-label fw-bold">Description</label>
+                                        <textarea class="form-control video-description" rows="2"
+                                                  placeholder="Enter video description"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Video 2 -->
+                            <div class="video-input-group mb-4 p-3 border rounded" data-video="2">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="mb-0"><i class="fas fa-video"></i> Video 2</h5>
+                                    <button type="button" class="btn btn-outline-danger btn-sm remove-video" style="display: none;">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Title *</label>
+                                        <input type="text" class="form-control video-title" 
+                                               placeholder="Enter video title" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Tags</label>
+                                        <input type="text" class="form-control video-tags"
+                                               placeholder="Enter tags separated by commas">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <label class="form-label fw-bold">Description</label>
+                                        <textarea class="form-control video-description" rows="2"
+                                                  placeholder="Enter video description"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-chart-bar"></i> Compare Videos
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Section -->
+    <div class="row" id="resultsSection" style="display: none;">
+        <div class="col-12">
+            <div class="card shadow-lg animate-fade-in">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0"><i class="fas fa-chart-bar"></i> Comparison Results</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="comparisonTable">
+                            <thead>
+                                <tr>
+                                    <th>Video</th>
+                                    <th>Title</th>
+                                    <th>Predicted Views</th>
+                                    <th>Category</th>
+                                    <th>Confidence</th>
+                                </tr>
+                            </thead>
+                            <tbody id="comparisonBody">
+                                <!-- Results will be inserted here -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Visual Comparison -->
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0"><i class="fas fa-chart-bar"></i> View Count Comparison</h6>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="viewsChart" height="200"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0"><i class="fas fa-chart-pie"></i> Category Distribution</h6>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="categoryChart" height="200"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Winner Announcement -->
+                    <div class="winner-section mt-4 text-center p-4 bg-light rounded" id="winnerSection">
+                        <h5><i class="fas fa-trophy text-warning"></i> Best Performing Video</h5>
+                        <h3 id="winnerTitle" class="text-primary">-</h3>
+                        <p class="text-muted" id="winnerStats">-</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let videoCount = 2;
+    let viewsChart = null;
+    let categoryChart = null;
+
+    // Add video button
+    document.getElementById('addVideoBtn').addEventListener('click', function() {
+        if (videoCount >= 5) {
+            alert('Maximum 5 videos allowed for comparison');
+            return;
+        }
+        
+        videoCount++;
+        
+        const videoInput = document.createElement('div');
+        videoInput.className = 'video-input-group mb-4 p-3 border rounded';
+        videoInput.setAttribute('data-video', videoCount);
+        videoInput.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0"><i class="fas fa-video"></i> Video ${videoCount}</h5>
+                <button type="button" class="btn btn-outline-danger btn-sm remove-video">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold">Title *</label>
+                    <input type="text" class="form-control video-title" 
+                           placeholder="Enter video title" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold">Tags</label>
+                    <input type="text" class="form-control video-tags"
+                           placeholder="Enter tags separated by commas">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <label class="form-label fw-bold">Description</label>
+                    <textarea class="form-control video-description" rows="2"
+                              placeholder="Enter video description"></textarea>
+                </div>
+            </div>
+        `;
+        
+        document.getElementById('videoInputs').appendChild(videoInput);
+        
+        // Add remove functionality
+        videoInput.querySelector('.remove-video').addEventListener('click', function() {
+            videoInput.remove();
+            videoCount--;
+            updateRemoveButtons();
+        });
+        
+        updateRemoveButtons();
+    });
+
+    function updateRemoveButtons() {
+        const removeButtons = document.querySelectorAll('.remove-video');
+        removeButtons.forEach(btn => {
+            btn.style.display = videoCount > 2 ? 'block' : 'none';
+        });
+    }
+
+    // Form submission
+    document.getElementById('compareForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const videos = [];
+        const videoGroups = document.querySelectorAll('.video-input-group');
+        
+        videoGroups.forEach(group => {
+            const title = group.querySelector('.video-title').value;
+            const description = group.querySelector('.video-description').value;
+            const tags = group.querySelector('.video-tags').value;
+            
+            if (title) {
+                videos.push({
+                    title: title,
+                    description: description,
+                    tags: tags
+                });
+            }
+        });
+        
+        if (videos.length < 2) {
+            alert('Please enter at least 2 videos to compare');
+            return;
+        }
+        
+        try {
+            const response = await fetch('/api/compare', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ videos: videos })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                displayResults(data.results);
+            } else {
+                alert('Error: ' + data.error);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again.');
+        }
+    });
+
+    function displayResults(results) {
+        const tbody = document.getElementById('comparisonBody');
+        tbody.innerHTML = '';
+        
+        let maxViews = 0;
+        let winnerIndex = 0;
+        
+        results.forEach((result, index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><strong>Video ${index + 1}</strong></td>
+                <td>${result.title.substring(0, 50)}${result.title.length > 50 ? '...' : ''}</td>
+                <td><strong>${result.predicted_views.toLocaleString()}</strong></td>
+                <td><span class="badge bg-primary">${result.predicted_category}</span></td>
+                <td>${result.confidence ? (result.confidence * 100).toFixed(1) + '%' : 'N/A'}</td>
+            `;
+            tbody.appendChild(row);
+            
+            if (result.predicted_views > maxViews) {
+                maxViews = result.predicted_views;
+                winnerIndex = index;
+            }
+        });
+        
+        // Show results section
+        document.getElementById('resultsSection').style.display = 'block';
+        
+        // Update winner
+        document.getElementById('winnerTitle').textContent = results[winnerIndex].title;
+        document.getElementById('winnerStats').textContent = 
+            `Predicted Views: ${results[winnerIndex].predicted_views.toLocaleString()} | Category: ${results[winnerIndex].predicted_category}`;
+        
+        // Create charts
+        createCharts(results);
+        
+        // Scroll to results
+        document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function createCharts(results) {
+        // Views chart
+        const viewsCtx = document.getElementById('viewsChart').getContext('2d');
+        
+        if (viewsChart) {
+            viewsChart.destroy();
+        }
+        
+        viewsChart = new Chart(viewsCtx, {
+            type: 'bar',
+            data: {
+                labels: results.map((r, i) => `Video ${i + 1}`),
+                datasets: [{
+                    label: 'Predicted Views',
+                    data: results.map(r => r.predicted_views),
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.7)',
+                        'rgba(54, 162, 235, 0.7)',
+                        'rgba(255, 206, 86, 0.7)',
+                        'rgba(75, 192, 192, 0.7)',
+                        'rgba(153, 102, 255, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+        
+        // Category chart
+        const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+        
+        if (categoryChart) {
+            categoryChart.destroy();
+        }
+        
+        const categories = results.map(r => r.predicted_category);
+        const uniqueCategories = [...new Set(categories)];
+        const categoryCounts = uniqueCategories.map(cat => 
+            categories.filter(c => c === cat).length
+        );
+        
+        categoryChart = new Chart(categoryCtx, {
+            type: 'doughnut',
+            data: {
+                labels: uniqueCategories,
+                datasets: [{
+                    data: categoryCounts,
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.7)',
+                        'rgba(54, 162, 235, 0.7)',
+                        'rgba(255, 206, 86, 0.7)',
+                        'rgba(75, 192, 192, 0.7)',
+                        'rgba(153, 102, 255, 0.7)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    }
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .video-input-group {
+        background-color: #f8f9fa;
+        transition: all 0.3s ease;
+    }
+    
+    .video-input-group:hover {
+        background-color: #e9ecef;
+    }
+    
+    .animate-fade-in {
+        animation: fadeIn 0.5s ease-in-out;
+    }
+    
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .winner-section {
+        border: 2px solid #ffc107;
+    }
+</style>
+{% endblock %}

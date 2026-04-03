@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+
+{% block title %}Predict - YouTube Data Analysis{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="text-center mb-5">
+                <h1 class="display-5 fw-bold">
+                    <i class="fas fa-magic text-primary"></i> Video Prediction
+                </h1>
+                <p class="lead text-muted">
+                    Enter your video details to get predicted views and suggested category
+                </p>
+            </div>
+
+            <!-- Prediction Form -->
+            <div class="card shadow-lg mb-5">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-video"></i> Video Information</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('predict') }}" id="predictionForm">
+                        <div class="mb-4">
+                            <label for="title" class="form-label fw-bold">
+                                <i class="fas fa-heading"></i> Video Title *
+                            </label>
+                            <input type="text" class="form-control form-control-lg" id="title" name="title"
+                                   placeholder="Enter your video title" 
+                                   value="{{ title if title else '' }}" required>
+                            <div class="form-text">
+                                A compelling title can significantly impact your video's performance
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="description" class="form-label fw-bold">
+                                <i class="fas fa-align-left"></i> Description
+                            </label>
+                            <textarea class="form-control" id="description" name="description" rows="5"
+                                      placeholder="Enter your video description">{{ description if description else '' }}</textarea>
+                            <div class="form-text">
+                                Detailed descriptions help with category prediction and SEO
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="tags" class="form-label fw-bold">
+                                <i class="fas fa-tags"></i> Tags
+                            </label>
+                            <input type="text" class="form-control" id="tags" name="tags"
+                                   placeholder="Enter tags separated by commas"
+                                   value="{{ tags if tags else '' }}">
+                            <div class="form-text">
+                                Example: python, tutorial, programming, coding
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-magic"></i> Predict Now
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            {% if show_results %}
+            <div class="card shadow-lg animate-fade-in" id="resultsCard">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0"><i class="fas fa-chart-bar"></i> Prediction Results</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- View Prediction -->
+                        <div class="col-md-6 mb-4">
+                            <div class="result-box">
+                                <div class="result-icon">
+                                    <i class="fas fa-eye"></i>
+                                </div>
+                                <h5 class="text-muted">Predicted Views</h5>
+                                <h2 class="display-4 fw-bold text-primary" id="viewCount">
+                                    {{ "{:,.0f}".format(view_prediction) }}
+                                </h2>
+                                <p class="text-muted mb-0">
+                                    Estimated view count based on your content
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Category Prediction -->
+                        <div class="col-md-6 mb-4">
+                            <div class="result-box">
+                                <div class="result-icon">
+                                    <i class="fas fa-tag"></i>
+                                </div>
+                                <h5 class="text-muted">Suggested Category</h5>
+                                <h2 class="display-6 fw-bold text-success" id="categoryName">
+                                    {{ category_prediction.category }}
+                                </h2>
+                                {% if category_prediction.confidence %}
+                                <div class="mt-2">
+                                    <span class="badge bg-info">
+                                        Confidence: {{ "{:.1%}".format(category_prediction.confidence) }}
+                                    </span>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Insights -->
+                    <div class="insights-section mt-4">
+                        <h5><i class="fas fa-lightbulb text-warning"></i> Insights</h5>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="insight-card">
+                                    <i class="fas fa-ruler-horizontal text-primary"></i>
+                                    <div>
+                                        <strong>Title Length</strong>
+                                        <p class="mb-0">{{ title|length }} characters</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="insight-card">
+                                    <i class="fas fa-tags text-success"></i>
+                                    <div>
+                                        <strong>Tag Count</strong>
+                                        <p class="mb-0">{{ tags.split(',')|length if tags else 0 }} tags</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="insight-card">
+                                    <i class="fas fa-file-alt text-info"></i>
+                                    <div>
+                                        <strong>Description</strong>
+                                        <p class="mb-0">{{ description|length }} characters</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recommendations -->
+                    <div class="recommendations-section mt-4">
+                        <h5><i class="fas fa-star text-warning"></i> Recommendations</h5>
+                        <ul class="list-group list-group-flush">
+                            {% if title|length < 50 %}
+                            <li class="list-group-item">
+                                <i class="fas fa-exclamation-circle text-warning"></i>
+                                Consider making your title longer (50-60 characters is optimal)
+                            </li>
+                            {% endif %}
+                            {% if not tags %}
+                            <li class="list-group-item">
+                                <i class="fas fa-exclamation-circle text-warning"></i>
+                                Add relevant tags to improve discoverability
+                            </li>
+                            {% endif %}
+                            {% if description|length < 100 %}
+                            <li class="list-group-item">
+                                <i class="fas fa-exclamation-circle text-warning"></i>
+                                Write a more detailed description (at least 100 characters)
+                            </li>
+                            {% endif %}
+                            <li class="list-group-item">
+                                <i class="fas fa-check-circle text-success"></i>
+                                Your video is categorized as <strong>{{ category_prediction.category }}</strong>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="mt-4 text-center">
+                        <a href="{{ url_for('predict') }}" class="btn btn-outline-primary me-2">
+                            <i class="fas fa-redo"></i> Predict Another
+                        </a>
+                        <a href="{{ url_for('compare') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-balance-scale"></i> Compare Videos
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .result-box {
+        text-align: center;
+        padding: 2rem;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 15px;
+        transition: transform 0.3s ease;
+    }
+    
+    .result-box:hover {
+        transform: translateY(-5px);
+    }
+    
+    .result-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: #6c757d;
+    }
+    
+    .insight-card {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+    }
+    
+    .insight-card i {
+        font-size: 1.5rem;
+    }
+    
+    .animate-fade-in {
+        animation: fadeIn 0.5s ease-in-out;
+    }
+    
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+{% endblock %}
